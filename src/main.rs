@@ -1,3 +1,6 @@
+pub mod generate_schedule;
+use generate_schedule::generate_schedule;
+use crate::generate_schedule::ScheduleOptions;
 use dialoguer::{Select, Input};
 use std::process;
 use serde::Deserialize;
@@ -34,7 +37,7 @@ struct RosterSettings {
 }
 
 #[derive(Deserialize, Debug)]
-struct Roster {
+pub struct Roster {
     owner_id: String,
     settings: RosterSettings,
 }
@@ -90,7 +93,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("We'll now need some input on how the schedule should be configured.");
 
-    let schedule_options = vec!["Round Robin", "2x Divisional Team Matchups"];
+    // TODO: ScheduleType
+    let schedule_options = vec!["Round Robin", "Divisional"];
     let schedule_option_index = Select::new().with_prompt("Choose from one of the following schedule options")
         .items(&schedule_options)
         .default(0)
@@ -117,5 +121,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             process::exit(1);
         }
     }
+
+    let schedule = generate_schedule(ScheduleOptions {
+        schedule_type: schedule_option_selection.to_string(),
+        num_weeks: 14,
+        rosters: vec![],
+        divisions: vec![1, 2]
+    });
+
     Ok(())
 }
